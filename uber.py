@@ -5,7 +5,7 @@
 -create_map
 <local_path>. """
 
-from funciones import crear_mapa,crear_lugar,crear_persona
+from funciones import crear_mapa,crear_lugar,crear_persona,crear_auto
 
 def hola():
     print ("Bienvenido Harpomaxx")
@@ -72,7 +72,7 @@ if args.create_map:
             mapa = crear_mapa(esquinas,calles)
             print("-Mapa creado-")
             ##Hay que guardar el mapa
-            with open('mapa.pickle', 'wb') as archivo:
+            with open('pickle/mapa.pickle', 'wb') as archivo:
                 pickle.dump(mapa, archivo)
                 print("-Mapa guardado-")
 
@@ -83,17 +83,17 @@ elif args.load_fix_element:
     nombre = args.load_fix_element[0]
     direccion = args.load_fix_element[1]
 
-    #Verificamos si el mapa existe
+    #Lanzar error si el mapa no existe
+
+    #Cargamos el mapa
     with open('mapa.pickle', 'rb') as archivo:
         print('Cargando Mapa existente')
         mapa_cargado = pickle.load(archivo)
         print('Mapa Cargado exitosamente')
 
-    #Lanzar error si el mapa no existe
-
     #Verificamos si objetos.pickle existe
-    if os.path.isfile('objetos.pickle'):
-        with open('objetos_fijos.pickle', 'rb') as archivo:
+    if os.path.isfile('pickle/objetos_fijos.pickle'):
+        with open('pickle/objetos_fijos.pickle', 'rb') as archivo:
             print("Cargando Objetos existentes")
             lugares = pickle.load(archivo)
         
@@ -101,13 +101,13 @@ elif args.load_fix_element:
         lugares = crear_lugar(lugares,nombre,direccion,mapa_cargado)
 
         #Guardamos
-        with open('objetos_fijos.pickle', 'wb') as archivo:
+        with open('pickle/objetos_fijos.pickle', 'wb') as archivo:
             pickle.dump(lugares, archivo)
             print("-Lugares guardado-") 
             
     else:
         lugares = crear_lugar({},nombre,direccion,mapa_cargado)
-        with open('objetos_fijos.pickle', 'wb') as archivo:
+        with open('pickle/objetos_fijos.pickle', 'wb') as archivo:
             pickle.dump(lugares, archivo)
             print("-Lugares guardado-")
 
@@ -120,41 +120,68 @@ elif args.load_movil_element:
     direccion = args.load_movil_element[1]
     monto = args.load_movil_element[2]
 
+    funciona = False
     #Verificamos si el mapa existe
-    with open('mapa.pickle', 'rb') as archivo:
+    ruta_archivo = "pickle/mapa.pickle"
+
+    assert os.path.exists(ruta_archivo),f'Error al cargar el mapa, Verifique si creo el mapa'
+
+    #Cargamos el mapa
+    with open('pickle/mapa.pickle', 'rb') as archivo:
         print('Cargando Mapa existente')
         mapa_cargado = pickle.load(archivo)
         print('Mapa Cargado exitosamente')
-    
-    #Lanzar error si mapa no existe
+        funciona = True
 
     #Logica
     if nombre[0] == "P":
-        if os.path.isfile('objetos_personas.pickle'):
+        if os.path.isfile('pickle/objetos_personas.pickle'):
             #Cargamos las Personas
-            with open('objetos_personas.pickle', 'rb') as archivo:
+            with open('pickle/objetos_personas.pickle', 'rb') as archivo:
                 print("Cargando Objetos existentes")
                 personas = pickle.load(archivo)
             
-            #Usamos la funcion para crear lugares
+            #Usamos la funcion para crear la nueva persona
             personas = crear_persona(personas,nombre,direccion,monto,mapa_cargado)
 
             #Guardamos
-            with open('objetos_personas.pickle', 'wb') as archivo:
+            with open('pickle/objetos_personas.pickle', 'wb') as archivo:
                 pickle.dump(personas, archivo)
                 print("-Personas guardado-") 
+            
+            print(f'Se cargó el elemento móvil Persona = {nombre} -->,{personas[nombre]}')
                 
         else:
             personas = crear_persona({},nombre,direccion,monto,mapa_cargado)
-            with open('objetos_personas.pickle', 'wb') as archivo:
+            with open('pickle/objetos_personas.pickle', 'wb') as archivo:
                 pickle.dump(personas, archivo)
                 print("-Personas guardado-")
-
+                
+            print(f'Se cargó el elemento móvil Persona = {nombre} -->,{personas[nombre]}')
     elif nombre[0] == "C":
-        pass
+        if os.path.isfile('pickle/objetos_autos.pickle'):
+            #Cargamos los autos
+            with open('pickle/objetos_autos.pickle', 'rb') as archivo:
+                print("Cargando Autos existentes")
+                autos = pickle.load(archivo)
+            
+            #Usamos la funcion para crear el auto nuevo
+            autos = crear_auto(autos,nombre,direccion,monto,mapa_cargado)
 
+            #Guardamos
+            with open('pickle/objetos_autos.pickle', 'wb') as archivo:
+                pickle.dump(autos, archivo)
+                print("-Autos guardado-") 
+            
+            print(f'Se cargó el elemento móvil Persona = {nombre} -->,{autos[nombre]}')
+        else:
+            autos = crear_auto({},nombre,direccion,monto,mapa_cargado)
+            with open('pickle/objetos_autos.pickle', 'wb') as archivo:
+                pickle.dump(autos, archivo)
+                print("-Auto guardado-")
+            print(f'Se cargó el elemento móvil Persona = {nombre} -->,{autos[nombre]}')
 
-    print(f'Se cargó el elemento móvil "{nombre}" en el mapa con dirección "{direccion}" y monto {monto}')
+    
 
 
 #Cargar Mapa ya que existe

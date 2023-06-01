@@ -30,22 +30,45 @@ def crear_lugar(hash_lugares,nombre,direccion,mapa):
 
 def crear_persona(hash_personas,nombre,direccion,monto,mapa):
     """retorna el hash con las personas actualizadas"""
-    assert direccion in mapa,f'La persona {nombre}, no se cargo, no existe {direccion} en el mapa'
+    #Luego borrar
+    direccion = eval(direccion)
+    #
+
+    direccion_final = list(direccion)
+
+    for d in direccion:
+        if d[0] not in mapa:
+            direccion_final.remove(d)
+
+    assert direccion_final,f'La persona {nombre}, no se cargo, no existe {direccion} en el mapa'
     assert nombre not in hash_personas,f'La persona ya existe dentro del mapa'
-    hash_personas[nombre] = [direccion,monto]
+    hash_personas[nombre] = [direccion_final,monto]
     return hash_personas
 
-def crear_auto(hash_autos,nombre,direccion,monto):
-    """retorna el objeto auto creado"""
-    if nombre not in hash_autos:
-        hash_autos[nombre] = [direccion,monto]
-        return "Creado con exito"
-    return "Fallo,Auto ya existente"
+def crear_auto(hash_autos,nombre,direccion,monto,mapa):
+    """retorna el hash con los autos actualizados"""
+    #Luego borrar
+    direccion = eval(direccion)
+    #
+
+    direccion_final = list(direccion)
+
+    for d in direccion:
+        if d[0] not in mapa:
+            direccion_final.remove(d)
+    
+    assert direccion_final,f'El auto {nombre}, no se cargo, no existe {direccion} en el mapa'
+    assert nombre not in hash_autos,f'El Auto ya existe dentro del mapa'
+    hash_autos[nombre] = [direccion_final,monto]
+    return hash_autos
 
 # 2-
-def conocer_ubicacion():
+def conocer_ubicacion(objeto_movil,hash_movil):
     """retorna la ubicacion del mismo sea auto,lugar o persona"""
-    pass
+    return hash_movil[objeto_movil]
+
+
+
 # 3-
 def encontrar_autos_cercanos(persona):
     """retorna una tupla de los 10 autos mas cercanos"""
