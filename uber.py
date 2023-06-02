@@ -1,5 +1,5 @@
 #Importamos los Modulos
-from funciones import crear_mapa,crear_lugar,crear_persona,crear_auto,conocer_ubicacion,validar_lugares
+from funciones import crear_mapa,crear_lugar,crear_persona,crear_auto,conocer_ubicacion,validar_lugares,crear_viaje
 import os
 import argparse
 import pickle
@@ -14,8 +14,10 @@ parser.add_argument('-load_fix_element', nargs=2, metavar=('nombre', 'direccion'
 # Comando load_movil_element
 parser.add_argument('-load_movil_element', nargs=3, metavar=('nombre', 'direccion', 'monto'), help='Carga un elemento móvil en el mapa')
 # Comando location_element
-parser.add_argument('-location_element', nargs=1, metavar=('nombre'), help='Te dice la direccion donde se encuentra el elemento')
-# 
+parser.add_argument('-location_element', nargs=1, metavar=('nombre'), help='Muestra la ubicacion del elemento')
+# Comando create_trip
+parser.add_argument('-create_trip', nargs=2, metavar=('nombre','direccion/elemento'), help='Crea el viaje')
+#
 args = parser.parse_args()
 
 ###- Creamos el Mapa
@@ -213,5 +215,8 @@ elif args.location_element:
         
     print(conocer_ubicacion(nombre,mapa_cargado))
     
-
+elif args.create_trip:
+    persona = args.create_trip[0]
+    direccion = args.create_trip[1]
+    crear_viaje(persona,direccion)
 ###- Meter Logica de los algoritmos

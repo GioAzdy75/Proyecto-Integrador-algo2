@@ -87,6 +87,13 @@ def conocer_ubicacion(objeto_movil,hash_movil):
         return f'No existe el objeto {objeto_movil}'
 
 
+def dijkstra(graph,nodeA,nodeB):
+    """Busca la distancia mas corta entre un nodo A y un nodo B"""
+    pass
+
+def dijkstra_allnodes(graph,nodeA):
+    """Desde un nodo A el camino mas cerano a todos los nodos"""
+    pass
 
 # 3-
 def encontrar_autos_cercanos(persona):
@@ -96,4 +103,42 @@ def encontrar_autos_cercanos(persona):
 # 4-
 def camino_mas_corto(direccion_1,direccion_2):
     """retorna el camino mas corto entre las dos direcciones"""
+    pass
+
+
+def crear_viaje(persona,direccion):
+    """Crea el viaje de uber"""
+    print(f'------ Bienvenido {persona} ------')
+    #Validar la direccion
+
+    autos_cercanos = encontrar_autos_cercanos(persona)
+
+    autos_cercanos = [('C1',30),('C2',40),('C3',50)]#Borrar una vez implementada la funcion
+    #Casos 1 -> No hay autos cercanos
+    if not autos_cercanos:
+        print('-- No hay autos cercanos que puedan realizar el viaje --')
+        return
+    #Caso 2 -> Muestra una lista de autos cercanos
+    
+    print('####Estos son los Autos mas Cercanos####')
+    print('elejir entre:')
+    indice = 0
+    for auto in autos_cercanos:
+        if indice == 0:
+            print('|Autos|Costo|')
+        print(auto,'-->',indice)
+        indice += 1
+    #Elije el auto
+    auto = int(input('elijo el auto: '))
+    #Validacion del auto
+    while auto >= indice:
+        print('// Auto Invalido, vuelva a ingresar //')
+        auto = int(input('elijo el auto: '))
+
+    
+
+    #Crea el camino hacia destino
+    #camino_destino = camino_mas_corto()
+
+    return None #camino_destino
     pass
