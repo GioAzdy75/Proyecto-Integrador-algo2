@@ -20,13 +20,29 @@ def crear_mapa(vertices,aristas):
     
     return mapa
 
+def validar_lugares(lugar):
+    """Verifica si es un Hospital,Almacen,Tienda,Supermercado,Escuela,Kiosco o Iglesia"""
+    lugares_validos = ('H','A','T','S','E','K','I')
+    if lugar[0] in lugares_validos:
+        return True
+    else:
+        return False
+
 def crear_lugar(hash_lugares,nombre,direccion,mapa):
     """retorna el hash con los lugares actualizados"""
-    assert direccion in mapa,f'El objeto {nombre}, no se cargo, no existe direccion {direccion} en el mapa'
-    assert nombre not in hash_lugares,f'El objeto ya existe dentro del mapa'
-    hash_lugares[nombre] = direccion
-    return hash_lugares
+    #Luego borrar
+    direccion = eval(direccion)
+    #
 
+    direccion_final = list(direccion)
+
+    for d in direccion:
+        if d[0] not in mapa:
+            direccion_final.remove(d)
+    assert direccion_final,f'El Lugar Fijo: {nombre}, no se cargo, no existe {direccion} en el mapa'
+    assert nombre not in hash_lugares,f'El objeto ya existe dentro del mapa'
+    hash_lugares[nombre] = direccion_final
+    return hash_lugares
 
 def crear_persona(hash_personas,nombre,direccion,monto,mapa):
     """retorna el hash con las personas actualizadas"""
@@ -65,7 +81,10 @@ def crear_auto(hash_autos,nombre,direccion,monto,mapa):
 # 2-
 def conocer_ubicacion(objeto_movil,hash_movil):
     """retorna la ubicacion del mismo sea auto,lugar o persona"""
-    return hash_movil[objeto_movil]
+    if objeto_movil in hash_movil:
+        return hash_movil[objeto_movil]
+    else:
+        return f'No existe el objeto {objeto_movil}'
 
 
 

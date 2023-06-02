@@ -1,0 +1,12 @@
+###Comandos para testear
+#Crear Mapa
+python uber.py -create_map 'mapa_ejemplo'
+
+#Cargar Objeto Fijo
+python uber.py -load_fix_element 'K6' '((\"e10\",10),(\"e25\",20))'
+
+#Cargar Objeto Movil
+python uber.py -load_movil_element 'C6' '((\"e10\",10),(\"e25\",20))' '5  --> la direccion tiene que tener las barras
+
+#Conocer la ubicacion del objeto
+python uber.py -load_movil_element 'C6' '((\"e10\",10),(\"e25\",20))' '5
