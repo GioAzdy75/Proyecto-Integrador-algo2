@@ -318,17 +318,24 @@ def camino_mas_corto(Graph, direction_1, direction_2): #¿Para direcciones de ti
     assert direction_1[1][0] in Graph, f"La esquina {direction_1[1][0]} de la {direction_1} no sé encuentra en el mapa" 
     assert direction_2[0][0] in Graph, f"La esquina {direction_2[0][0]} de la {direction_2} no sé encuentra en el mapa"
     assert direction_2[1][0] in Graph, f"La esquina {direction_2[1][0]} de la {direction_2} no sé encuentra en el mapa" 
-    #Cargar las direciones en el mapa.
-    updateMap(Graph, "D1", direction_1)
-    updateMap(Graph, "D2", direction_2)
-    #Crear la lista de nodos(pasar los vértices a class = Node()).
+    #Obtener los nombres de la direcciones inicial y final.
     listVertex = list(Graph.keys())
+    final_destination = "Destino Final" #Se actualiza a un lugar fijo en el caso de que la dirección esté asignada a este.
+    for key in listVertex:
+        if Graph[key] == direction_1:
+            person = key
+        elif Graph[key] == direction_2:
+            final_destination = key
+    #En el caso de que el destino no sé encuentre en el mapa lo ingreso.
+    if final_destination == "Destino Final":
+        updateMap(Graph, final_destination, direction_2)
+    #Crear la lista de nodos(pasar los vértices a class = Node()).
     listTypeNodes = []
     for vertex in listVertex:
         listTypeNodes = DefinedVertexDijkstra(vertex, listTypeNodes)
     #Init relax
     for vertexNode in listTypeNodes:
-        if vertexNode.value == "D1":
+        if vertexNode.value == person:
             initRelax(listTypeNodes, vertexNode)
             break
     #Definir lista de nodos visitados.
@@ -339,7 +346,7 @@ def camino_mas_corto(Graph, direction_1, direction_2): #¿Para direcciones de ti
         #Obtener el vértice de la cola.
         u = Queue.pop(0)
         #Si se cumple es que llegue a la dirección de destino.
-        if u.value == "D2":
+        if u.value == final_destination:
            #Obtener el camino más corto de "D1" a "D2".
                 listShortestPath = []
                 while u.parent != None:
@@ -371,6 +378,7 @@ def create_trip(map, person, direction, hash_movil_element, hash_fix_element):
         assert validar_lugares(direction) is True, f"Dirección Inválida"
         direction = hash_fix_element[direction] #Obtener la dirección de un lugar fijo.
     else: #Dirección de lugar fijo, por ej: {("e3",7),("e5",8)}.
+        direction = list(direction)
         assert direction[0][0] in map, f"La esquina {direction[0][0]} de la {direction} no sé encuentra en el mapa"
         assert direction[1][0] in map, f"La esquina {direction[1][0]} de la {direction} no sé encuentra en el mapa" 
     #Buscar los tres autos que la persona puede pagar más cercanos.
