@@ -362,8 +362,63 @@ def camino_mas_corto(Graph, direction_1, direction_2): #¿Para direcciones de ti
     return False
 
 #5-
-def crear_viaje(persona,direccion):
+def create_trip(map, person, direction, hash_movil_element, hash_fix_element):
     """Crea el viaje de uber"""
+    print(f'------ Bienvenido {person} ------')
+    #Validar la dirección.
+    direction = eval("direction")
+    if type(direction) is str: #Dirección de lugar fijo, por ej: "S1", "A5", "H2".
+        assert validar_lugares(direction) is True, f"Dirección Inválida"
+        direction = hash_fix_element[direction] #Obtener la dirección de un lugar fijo.
+    else: #Dirección de lugar fijo, por ej: {("e3",7),("e5",8)}.
+        assert direction[0][0] in map, f"La esquina {direction[0][0]} de la {direction} no sé encuentra en el mapa"
+        assert direction[1][0] in map, f"La esquina {direction[1][0]} de la {direction} no sé encuentra en el mapa" 
+    #Buscar los tres autos que la persona puede pagar más cercanos.
+    autos_cercanos = encontrar_autos_cercanos(map, person, hash_movil_element)
+    #Casos 1 -> No hay autos cercanos
+    if not autos_cercanos:
+        print('-- No hay autos cercanos que puedan realizar el viaje --')
+        return
+    #Caso 2 -> Muestra una lista de autos cercanos
+    print('####Estos son los autos mas cercanos####')
+    print('Elegir entre:')
+    indice = 0
+    for auto in autos_cercanos:
+        if indice == 0:
+            print('|Autos|Costo|')
+        print(auto)
+        indice += 1
+    #Elije el auto
+    auto = str(input('Elija un auto: '))
+    auto = auto.upper()
+    #Validación del auto
+    while (auto[0] != "C") or (int(auto[1]) > indice):
+        print('// Auto Invalido, vuelva a ingresar //')
+        auto = str(input('Elija un auto: '))
+        auto = auto.upper()
+    #Crea el camino hacia destino.
+    direction_person = hash_movil_element[person][0]
+    camino_destino = camino_mas_corto(map, direction_person, direction)
+    #Actualizar direcciones en el mapa de la persona y el auto.
+    map[auto] = direction
+    map[person] = direction
+    #Actualizar direcciones en el hash de la persona y el auto.
+    hash_movil_element[auto][0] = direction
+    hash_movil_element[person][0] = direction 
+    #Actualizar monto de la persona en el hash.
+    for car in autos_cercanos:
+        if car[0] == auto:
+            distance = car[1] #Obtengo la distancia (auto --> persona)
+    hash_movil_element[person][1] = (hash_movil_element[person][1] - ((distance +  hash_movil_element[auto][1]) / 4))
+    #Validar que el camino de destino exista.
+    if camino_destino != False:
+        return camino_destino
+    else:
+        return
+    
+#La comenté por las dudas pero arriba estaría la función de crear el viaje.
+"""def crear_viaje(persona,direccion):
+    #Crea el viaje de uber
     print(f'------ Bienvenido {persona} ------')
     #Validar la direccion
 
@@ -391,10 +446,10 @@ def crear_viaje(persona,direccion):
         print('// Auto Invalido, vuelva a ingresar //')
         auto = int(input('elijo el auto: '))
 
-    
+
 
     #Crea el camino hacia destino
     #camino_destino = camino_mas_corto()
 
     return None #camino_destino
-    pass
+    pass"""
