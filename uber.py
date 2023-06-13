@@ -281,7 +281,7 @@ elif args.create_trip:
     hash_moviles = {}
     hash_moviles.update(hash_personas)
     hash_moviles.update(hash_autos)
-    crear_viaje(mapa_cargado,persona,direccion,hash_moviles,hash_fijos)
+    print(crear_viaje(mapa_cargado,persona,direccion,hash_moviles,hash_fijos))
 ###- Meter Logica de los algoritmos
 
 
