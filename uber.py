@@ -33,6 +33,10 @@ if args.create_map:
             #Dividimos las lineas del archivo
             primer_linea = file.readline()
             segunda_linea = file.readline()
+            #Mostramos el Original en Pantalla
+            print("####ORIGINAL####")
+            print(primer_linea)
+            print(segunda_linea)
             #Parseamos las Esquinas
             primer_linea = primer_linea[3:-2] #quitamos los caracteres del principio y final
             primer_linea = primer_linea.replace('"','') #quitamos las comillas demas
@@ -41,19 +45,22 @@ if args.create_map:
             #Parseamos las Calles
             segunda_linea = segunda_linea.split('{')[1].split('}')[0] #quitamos los caracteres del principio y final
             segunda_linea = segunda_linea.replace(' ','')
-            segunda_linea = segunda_linea.split('),(')
+            segunda_linea = segunda_linea.replace('<','"')
+            segunda_linea = segunda_linea.replace('>','"')
+            segunda_linea = "[" + segunda_linea + "]"
+            segunda_linea = eval(segunda_linea)
             calles = []
-            for valor in segunda_linea:
-                if valor[0] == '(':
-                    valor += ')'
-                elif valor[-1] == ')':
-                    valor = '(' + valor
-                else:
-                    valor = '(' + valor + ')'
-                
-                tupla = eval(valor)
+            for elemento in segunda_linea:
+                valores = elemento.split(',')
+                tupla = tuple(valores)
                 calles.append(tupla)
 
+            #Mostramos el Parseo hecho
+            print("####Convertido####")
+            print(esquinas)
+            print(calles)
+            
+            #Empezamos con el mapa
             print("-Creando mapa-")
             mapa = crear_mapa(esquinas,calles)
             print("-Mapa creado-")
@@ -68,9 +75,20 @@ elif args.load_fix_element:
     nombre = args.load_fix_element[0]
     direccion = args.load_fix_element[1]
 
-    #Lanzar error si el lugar fijo no es un almacen,kiosco,etc
+    #Parsear Direccion
+    tupla = []
+    for elemento in direccion.split():
+        valores = elemento.strip("<>").split(",")
+        tupla.append((valores[0], int(valores[1])))
 
-    #Lanzar error si el mapa no existe
+    direccion = tupla
+
+    #Lanzar error si el lugar fijo no es un almacen,kiosco,etc
+    assert validar_lugares(nombre),f'No es valida la etiqueta: {nombre}'
+
+    #Verificamos si el mapa existe
+    ruta_archivo = "pickle/mapa.pickle"
+    assert os.path.exists(ruta_archivo),f'Error al cargar el mapa, Verifique si creo el mapa'
 
     #Cargamos el mapa
     with open('pickle/mapa.pickle', 'rb') as archivo:
@@ -104,12 +122,17 @@ elif args.load_fix_element:
 elif args.load_movil_element:
     nombre = args.load_movil_element[0]
     direccion = args.load_movil_element[1]
-    monto = args.load_movil_element[2]
+    monto = int(args.load_movil_element[2])
+    
+    #Parseamos la direccion
+    tupla = []
+    for elemento in direccion.split():
+        valores = elemento.strip("<>").split(",")
+        tupla.append((valores[0], int(valores[1])))
+    direccion = tupla
 
-    funciona = False
     #Verificamos si el mapa existe
     ruta_archivo = "pickle/mapa.pickle"
-
     assert os.path.exists(ruta_archivo),f'Error al cargar el mapa, Verifique si creo el mapa'
 
     #Cargamos el mapa
@@ -117,7 +140,6 @@ elif args.load_movil_element:
         print('Cargando Mapa existente')
         mapa_cargado = pickle.load(archivo)
         print('Mapa Cargado exitosamente')
-        funciona = True
 
     #Si se carga una Persona
     if nombre[0] == "P":
@@ -216,7 +238,113 @@ elif args.location_element:
     print(conocer_ubicacion(nombre,mapa_cargado))
     
 elif args.create_trip:
+    #Verificamos si el mapa existe
+    ruta_archivo = "pickle/mapa.pickle"
+    assert os.path.exists(ruta_archivo),f'Error al cargar el mapa, Verifique si creo el mapa'
+
+    #Cargamos el mapa
+    with open('pickle/mapa.pickle', 'rb') as archivo:
+        print('Cargando Mapa existente')
+        mapa_cargado = pickle.load(archivo)
+        print('Mapa Cargado exitosamente')
+
+    #Verificamos si existe los objetos fijos
+    ruta_archivo = "pickle/objetos_fijos.pickle"
+    assert os.path.exists(ruta_archivo),f'Error al cargar los lugares, Verifique si anadio lugares'
+        
+    with open('pickle/objetos_fijos.pickle', 'rb') as archivo:
+        print('Cargando Objetos Fijos existente')
+        hash_fijos = pickle.load(archivo)
+        print('Objetos Fijos cargados exitosamente')
+
+    #verificamos que exista los autos
+    ruta_archivo = "pickle/objetos_autos.pickle"
+    assert os.path.exists(ruta_archivo),f'Error al cargar los autos, Verifique si anadio autos'
+        
+    with open('pickle/objetos_autos.pickle', 'rb') as archivo:
+        print('Cargando Objetos Moviles existente')
+        hash_autos = pickle.load(archivo)
+        print('Objetos Moviles cargados exitosamente')
+
+    #verificamos que exista el hash de personas
+    ruta_archivo = "pickle/objetos_personas.pickle"
+    assert os.path.exists(ruta_archivo),f'Error al cargar las personas, Verifique si anadio personas'
+        
+    with open('pickle/objetos_personas.pickle', 'rb') as archivo:
+        print('Cargando Objetos Moviles existente')
+        hash_personas = pickle.load(archivo)
+        print('Objetos Moviles cargados exitosamente')
+
     persona = args.create_trip[0]
     direccion = args.create_trip[1]
-    crear_viaje(persona,direccion)
+
+    hash_moviles = {}
+    hash_moviles.update(hash_personas)
+    hash_moviles.update(hash_autos)
+    crear_viaje(mapa_cargado,persona,direccion,hash_moviles,hash_fijos)
 ###- Meter Logica de los algoritmos
+
+
+#IMPRIMIR MAPA
+
+##Imprimir Mapa Imagen
+#Requiere (pip install networkx) y (pip install matplotlib)
+"""
+def imprimir_mapa():
+    import networkx as nx
+    import matplotlib.pyplot as plt
+    
+
+
+    with open(f'./mapa.txt', 'r') as file:
+            #Dividimos las lineas del archivo
+            primer_linea = file.readline()
+            segunda_linea = file.readline()
+            #Mostramos el Original en Pantalla
+            print("####ORIGINAL####")
+            print(primer_linea)
+            print(segunda_linea)
+            #Parseamos las Esquinas
+            primer_linea = primer_linea[3:-2] #quitamos los caracteres del principio y final
+            primer_linea = primer_linea.replace('"','') #quitamos las comillas demas
+            segunda_linea = segunda_linea.replace(' ','')
+            esquinas = primer_linea.split(',')
+            #Parseamos las Calles
+            segunda_linea = segunda_linea.split('{')[1].split('}')[0] #quitamos los caracteres del principio y final
+            segunda_linea = segunda_linea.replace(' ','')
+            segunda_linea = segunda_linea.replace('<','"')
+            segunda_linea = segunda_linea.replace('>','"')
+            segunda_linea = "[" + segunda_linea + "]"
+            segunda_linea = eval(segunda_linea)
+            calles = []
+            for elemento in segunda_linea:
+                valores = elemento.split(',')
+                tupla = tuple(valores)
+                calles.append(tupla)
+
+            #Mostramos el Parseo hecho
+            print("####Convertido####")
+            print(esquinas)
+            print(calles)
+
+
+    G = nx.DiGraph()
+    for e in esquinas:
+        G.add_node(e)
+
+    for c in calles:
+        e1,e2,c = c
+        G.add_edge(e1,e2,weight=c)
+
+    pos = nx.spring_layout(G, k=0.5, iterations=100)  # Ajusta los valores de 'k' e 'iterations' para separar los nodos más
+
+    nx.draw(G, pos, with_labels=True, arrows=True)
+    edge_labels = nx.get_edge_attributes(G, 'weight')
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, label_pos=0.5)
+    plt.show()
+
+imprimir_mapa()
+
+
+
+"""
