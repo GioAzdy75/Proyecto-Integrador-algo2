@@ -301,8 +301,7 @@ def crear_viaje(map, person, direction, hash_movil_element, hash_fix_element):
 
     """Crea el viaje de uber"""
     print(f'------ Bienvenido {person} ------')
-    #Validar la dirección.
-    direction = eval("direction")
+    
     if type(direction) is str: #Dirección de lugar fijo, por ej: "S1", "A5", "H2".
         assert validar_lugares(direction) is True, f"Dirección Inválida"
         direction = hash_fix_element[direction] #Obtener la dirección de un lugar fijo.

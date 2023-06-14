@@ -283,10 +283,19 @@ elif args.create_trip:
 
     persona = args.create_trip[0]
     direccion = args.create_trip[1]
-
+    
     hash_moviles = {}
     hash_moviles.update(hash_personas)
     hash_moviles.update(hash_autos)
+
+    #Parsear Direccion
+    if not validar_lugares(direccion):
+        tupla = []
+        for elemento in direccion.split():
+            valores = elemento.strip("<>").split(",")
+            tupla.append((valores[0], int(valores[1])))
+        direccion = tupla
+    
     print(crear_viaje(mapa_cargado,persona,direccion,hash_moviles,hash_fijos))
 ###- Meter Logica de los algoritmos
 
