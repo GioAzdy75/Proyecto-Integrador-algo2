@@ -27,7 +27,13 @@ if args.create_map:
     assert not (os.path.exists(ruta_archivo)),f'Error, Mapa creado anteriormente'
     #Verificamos si el archivo mapa.txt existe
     assert (os.path.exists(f'{args.create_map[0]}.txt')),f'Error, No se encuentra {args.create_map[0]}.txt'
-
+    #Verificamos que la carpeta exista sino la creamos
+    if not os.path.exists('pickle'):
+        os.makedirs('pickle')
+        print(f"Se creó la carpeta '{'pickle'}'")
+    else:
+        print(f"La carpeta 'pickle' ya existe")
+        
     if True:
         with open(f'./{args.create_map[0]}.txt', 'r') as file:
             #Dividimos las lineas del archivo
