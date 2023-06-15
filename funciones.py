@@ -30,7 +30,6 @@ def validar_lugares(lugar):
 
 def crear_lugar(hash_lugares,nombre,direccion,mapa):
     """retorna el hash con los lugares actualizados"""
-
     direccion_final = list(direccion)
 
     for d in direccion:
@@ -75,7 +74,64 @@ def conocer_ubicacion(objeto_movil,hash_movil):
         return hash_movil[objeto_movil]
     else:
         return f'No existe el objeto {objeto_movil}'
-    
+        
+#Agregando la funcionalidad
+def cortar_camino(vertice_1,vertice_2,hash_recorridos):
+    '''revisa si ya tiene calculado el camino de los vertices'''
+    vertice_2 = vertice_2[0]
+    if vertice_1 in hash_recorridos:
+        if vertice_2 in hash_recorridos[vertice_1]:
+            print('Me tome un aventon wachin')
+            return hash_recorridos[vertice_1][vertice_2]
+#Preprocesando el mapa
+def dijkstra_preprocesos(graph, start):
+    recorrido_final = {}
+    recorrido_final_v2 = {}
+    # Inicializar las distancias, los caminos y los subcaminos de todos los nodos como infinito excepto el nodo inicial
+    distances = {node: float('inf') for node in graph}
+    distances[start] = 0
+    paths = {node: [] for node in graph}
+    subpaths = {node: [] for node in graph}
+    paths[start] = [start]
+    subpaths[start] = [start]
+    # Usar una lista para mantener un seguimiento de los nodos no visitados
+    queue = [(0, start)]
+    while queue:
+        queue.sort(key=lambda x: x[0])
+        current_distance, current_node = queue.pop(0)
+        # Si ya hemos procesado el nodo actual, saltamos a la siguiente iteración
+        if current_distance > distances[current_node]:
+            continue
+        # Explorar los vecinos del nodo actual
+        for neighbor, weight in graph[current_node]:
+            # Verificar si la arista va en la dirección correcta (grafo dirigido)
+            weight = int(weight)
+            if weight < 0:
+                continue
+            distance = current_distance + weight
+            # Si encontramos un camino más corto hacia el vecino, actualizamos la distancia, el camino y el subcamino
+            if distance < distances[neighbor]:
+                distances[neighbor] = distance
+                paths[neighbor] = paths[current_node] + [neighbor]
+                recorrido_final[neighbor] = [paths[neighbor], distances[neighbor]]
+                recorrido_final_v2[start] = recorrido_final
+                queue.append((distance, neighbor))
+    return recorrido_final_v2
+
+def preprocesando_mapa(graph):
+    import random
+    def nodo_azar():
+        azar = random.choice([True, False])
+        return azar
+    recorridos_procesados = {}
+    for e in graph:
+        if nodo_azar():
+            nuevos_recorridos = dijkstra_preprocesos(graph,e)
+            recorridos_procesados.update(nuevos_recorridos)
+    for i in graph:
+        if i[0] != 'e':
+            del recorridos_procesados[i]
+    return recorridos_procesados
 """~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ FUNCIONES PARA DIJKSTRA(INICIO) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"""
 class nodeVertex:
     value = None
@@ -95,7 +151,6 @@ def relax(u, tupleV, listNodes):
         if node.value == tupleV[0]:
             adjVertex = node        
             #Realizar relajo
-            #REVISAR --> HICE ARREGLO PROVISIONAL INT()
             if adjVertex.distance > (u.distance + int(tupleV[1])):
                 adjVertex.distance = u.distance + int(tupleV[1])
                 adjVertex.parent = u    
@@ -104,7 +159,7 @@ def relax(u, tupleV, listNodes):
 def initRelax(listNodes, v1):
     #Iniciar el relajamiento para cada vértice(nodo) del grafo.
     for node in listNodes:
-        node.distance = 999999999
+        node.distance = float('inf')
         node.parent = None
     v1.distance = 0
     return
@@ -215,7 +270,8 @@ def dijkstra_allnodes(Graph, person, hash_movil_element):
             if len(list_Distance_And_Cars) == 3: 
                 return list_Distance_And_Cars  #Devolver la lista con el ranking de los 3 autos más cercanos que la persona puede pagar.  
     #En el peor de los casos es que no hayan al menos 3 autos, devolver error.
-    assert list_Distance_And_Cars == 3, f"No sé pudieron devolver al menos tres autos."
+    #assert list_Distance_And_Cars == 3, f"No sé pudieron devolver al menos tres autos."
+    return list_Distance_And_Cars
 """~~~~~~~~~~~~~~~~~~~~ Nuevas funciones agregadas para el funcionamiento de los dijktras(FINAL) ~~~~~~~~~~~~~~~~~~~~"""
 
 # 3- 
@@ -230,14 +286,22 @@ def encontrar_autos_cercanos(map, persona, hash_movil_element):
     return listNearbyCars #Devuelve una lista como por ej: [('C1',30),('C2',40),('C3',50)]
 
 # 4- 
-def camino_mas_corto(Graph, direction_1, direction_2): #¿Para direcciones de tipo {("e3",7),("e5",8)}?
+def camino_mas_corto(Graph, direction_1, direction_2, process_map): #¿Para direcciones de tipo {("e3",7),("e5",8)}?
     """retorna el camino mas corto entre las dos direcciones"""
     assert Graph != {}, f"El mapa está vacío"
     #Verificar que las esquinas de las direcciones existen dentro del mapa.
     direction_1 = list(direction_1)
     direction_2 = list(direction_2)
+    #Provisorio que funcione solo con una direccion
+    if len(direction_1) == 1:
+        direction_1.append(direction_1[0])
+
     assert direction_1[0][0] in Graph, f"La esquina {direction_1[0][0]} de la {direction_1} no sé encuentra en el mapa"
-    assert direction_1[1][0] in Graph, f"La esquina {direction_1[1][0]} de la {direction_1} no sé encuentra en el mapa" 
+    assert direction_1[1][0] in Graph, f"La esquina {direction_1[1][0]} de la {direction_1} no sé encuentra en el mapa"
+    
+    if len(direction_2) == 1:
+        direction_2.append(direction_2[0])
+
     assert direction_2[0][0] in Graph, f"La esquina {direction_2[0][0]} de la {direction_2} no sé encuentra en el mapa"
     assert direction_2[1][0] in Graph, f"La esquina {direction_2[1][0]} de la {direction_2} no sé encuentra en el mapa" 
     #Obtener los nombres de la direcciones inicial y final.
@@ -265,9 +329,37 @@ def camino_mas_corto(Graph, direction_1, direction_2): #¿Para direcciones de ti
     listVisited = []
     #Ordenar la cola de nodos por su distancia.
     Queue = sorted(listTypeNodes, key=lambda node:node.distance)
+    value_final = [0,float('inf')]
     while Queue != []:
         #Obtener el vértice de la cola.
         u = Queue.pop(0)
+        #Logica para cortar camino por uno ya existente
+        if u.value[0] == 'P':
+            esquina_1 = direction_1[0][0]
+            esquina_2 = direction_1[1][0]
+            value1 = cortar_camino(esquina_1,direction_2[0],process_map)
+            value2 = cortar_camino(esquina_2,direction_2[1],process_map)
+            if value1:
+                if value2:
+                    if value1[1] > value2[1]:
+                        if value_final[1] > value2[1]:
+                            value_final = value2
+                    else:
+                        if value_final[1] > value1[1]:
+                            value_final = value1
+                else:
+                    if value_final[1] > value1[1]:
+                            value_final = value1
+            else:
+                if value2:
+                    if value_final[1] > value2[1]:
+                            value_final = value2
+            
+            if value1 and value2:
+                lista = [u.value] + value_final[0] + ['Destino Final']
+                return lista
+            
+
         #Si se cumple es que llegue a la dirección de destino.
         if u.value == final_destination:
            #Obtener el camino más corto de "D1" a "D2".
@@ -292,7 +384,7 @@ def camino_mas_corto(Graph, direction_1, direction_2): #¿Para direcciones de ti
     return False
 
 #5-
-def crear_viaje(map, person, direction, hash_movil_element, hash_fix_element):
+def crear_viaje(map, person, direction, hash_movil_element, hash_fix_element,process_map):
     ####ARREGLANDO COSAS
     for e in hash_movil_element:
         if e[0] == 'C':
@@ -313,8 +405,9 @@ def crear_viaje(map, person, direction, hash_movil_element, hash_fix_element):
     autos_cercanos = encontrar_autos_cercanos(map, person, hash_movil_element)
     #Casos 1 -> No hay autos cercanos
     if not autos_cercanos:
-        print('-- No hay autos cercanos que puedan realizar el viaje --')
-        return
+        return '-- No hay autos cercanos que puedan realizar el viaje --'
+    elif len(autos_cercanos)< 3:
+        return '-- No hay por lo menos 3 autos --'
     #Caso 2 -> Muestra una lista de autos cercanos
     print('####Estos son los autos mas cercanos####')
     print('Elegir entre:')
@@ -322,70 +415,37 @@ def crear_viaje(map, person, direction, hash_movil_element, hash_fix_element):
     for auto in autos_cercanos:
         if indice == 0:
             print('|Autos|Costo|')
-        print(auto)
+        print(auto,'-->',indice)
         indice += 1
     #Elije el auto
-    auto = str(input('Elija un auto: '))
-    auto = auto.upper()
+    auto = int(input('Elija un auto: '))
+    print(autos_cercanos)
     #Validación del auto
-    while (auto[0] != "C") or (int(auto[1]) > indice):
+    while auto >= indice:
         print('// Auto Invalido, vuelva a ingresar //')
-        auto = str(input('Elija un auto: '))
-        auto = auto.upper()
+        auto = int(input('Elija un auto: '))
+    auto = autos_cercanos[auto][0]
+
     #Crea el camino hacia destino.
     direction_person = hash_movil_element[person][0]
-    camino_destino = camino_mas_corto(map, direction_person, direction)
+    camino_destino = camino_mas_corto(map, direction_person, direction, process_map)
+
+    #Validar que el camino de destino exista.
+    if camino_destino == False:
+        return 'No se puede realizar el viaje'
+
     #Actualizar direcciones en el mapa de la persona y el auto.
     map[auto] = direction
     map[person] = direction
     #Actualizar direcciones en el hash de la persona y el auto.
     hash_movil_element[auto][0] = direction
-    hash_movil_element[person][0] = direction 
+    hash_movil_element[person][0] = direction
     #Actualizar monto de la persona en el hash.
     for car in autos_cercanos:
         if car[0] == auto:
             distance = car[1] #Obtengo la distancia (auto --> persona)
     hash_movil_element[person][1] = (hash_movil_element[person][1] - ((distance +  hash_movil_element[auto][1]) / 4))
-    #Validar que el camino de destino exista.
-    if camino_destino != False:
-        return camino_destino
-    else:
-        return
     
-#La comenté por las dudas pero arriba estaría la función de crear el viaje.
-"""def crear_viaje(persona,direccion):
-    #Crea el viaje de uber
-    print(f'------ Bienvenido {persona} ------')
-    #Validar la direccion
+    print(map[auto],'Direccion Actualizada')
 
-    autos_cercanos = encontrar_autos_cercanos(persona)
-
-    autos_cercanos = [('C1',30),('C2',40),('C3',50)]#Borrar una vez implementada la funcion
-    #Casos 1 -> No hay autos cercanos
-    if not autos_cercanos:
-        print('-- No hay autos cercanos que puedan realizar el viaje --')
-        return
-    #Caso 2 -> Muestra una lista de autos cercanos
-    
-    print('####Estos son los Autos mas Cercanos####')
-    print('elejir entre:')
-    indice = 0
-    for auto in autos_cercanos:
-        if indice == 0:
-            print('|Autos|Costo|')
-        print(auto,'-->',indice)
-        indice += 1
-    #Elije el auto
-    auto = int(input('elijo el auto: '))
-    #Validacion del auto
-    while auto >= indice:
-        print('// Auto Invalido, vuelva a ingresar //')
-        auto = int(input('elijo el auto: '))
-
-
-
-    #Crea el camino hacia destino
-    #camino_destino = camino_mas_corto()
-
-    return None #camino_destino
-    pass"""
+    return camino_destino

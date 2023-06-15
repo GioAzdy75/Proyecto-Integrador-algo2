@@ -1,5 +1,6 @@
 #Importamos los Modulos
 from funciones import crear_mapa,crear_lugar,crear_persona,crear_auto,conocer_ubicacion,validar_lugares,crear_viaje
+from funciones import preprocesando_mapa
 import os
 import argparse
 import pickle
@@ -31,18 +32,14 @@ if args.create_map:
     if not os.path.exists('pickle'):
         os.makedirs('pickle')
         print(f"Se creó la carpeta '{'pickle'}'")
-    else:
-        print(f"La carpeta 'pickle' ya existe")
         
     if True:
         with open(f'./{args.create_map[0]}.txt', 'r') as file:
             #Dividimos las lineas del archivo
             primer_linea = file.readline()
             segunda_linea = file.readline()
-            #Mostramos el Original en Pantalla
-            print("####ORIGINAL####")
-            print(primer_linea)
-            print(segunda_linea)
+            #Incia el proceso
+            print('-Leyendo Mapa-')
             #Parseamos las Esquinas
             primer_linea = primer_linea[3:-2] #quitamos los caracteres del principio y final
             primer_linea = primer_linea.replace('"','') #quitamos las comillas demas
@@ -62,9 +59,7 @@ if args.create_map:
                 calles.append(tupla)
 
             #Mostramos el Parseo hecho
-            print("####Convertido####")
-            print(esquinas)
-            print(calles)
+            print("-Parseando Mapa-")
             
             #Empezamos con el mapa
             print("-Creando mapa-")
@@ -74,7 +69,15 @@ if args.create_map:
             with open('pickle/mapa.pickle', 'wb') as archivo:
                 pickle.dump(mapa, archivo)
                 print("-Mapa guardado-")
-            print(mapa)
+
+            ##Procesando al azar el mapa
+            mapa_procesado = preprocesando_mapa(mapa)
+            print('Preprocesando Mapa')
+            with open('pickle/mapa_preprocesado.pickle', 'wb') as archivo:
+                pickle.dump(mapa, archivo)
+                print("-MapaProcesado guardado-")
+            print('#######################')
+            print('map created successfully')
 
 ###- Cargamos los elementos fijos
 elif args.load_fix_element:
@@ -296,70 +299,23 @@ elif args.create_trip:
             tupla.append((valores[0], int(valores[1])))
         direccion = tupla
     
-    print(crear_viaje(mapa_cargado,persona,direccion,hash_moviles,hash_fijos))
-###- Meter Logica de los algoritmos
-
-
-#IMPRIMIR MAPA
-
-##Imprimir Mapa Imagen
-#Requiere (pip install networkx) y (pip install matplotlib)
-"""
-def imprimir_mapa():
-    import networkx as nx
-    import matplotlib.pyplot as plt
+    ##Mapa Preprocesado
+    mapa_procesado = {}
+    with open('pickle/mapa_preprocesado.pickle', 'rb') as archivo:
+        mapa_procesado = pickle.load(archivo)
     
+    viaje_final = crear_viaje(mapa_cargado,persona,direccion,hash_moviles,hash_fijos,mapa_procesado)
 
-
-    with open(f'./mapa.txt', 'r') as file:
-            #Dividimos las lineas del archivo
-            primer_linea = file.readline()
-            segunda_linea = file.readline()
-            #Mostramos el Original en Pantalla
-            print("####ORIGINAL####")
-            print(primer_linea)
-            print(segunda_linea)
-            #Parseamos las Esquinas
-            primer_linea = primer_linea[3:-2] #quitamos los caracteres del principio y final
-            primer_linea = primer_linea.replace('"','') #quitamos las comillas demas
-            segunda_linea = segunda_linea.replace(' ','')
-            esquinas = primer_linea.split(',')
-            #Parseamos las Calles
-            segunda_linea = segunda_linea.split('{')[1].split('}')[0] #quitamos los caracteres del principio y final
-            segunda_linea = segunda_linea.replace(' ','')
-            segunda_linea = segunda_linea.replace('<','"')
-            segunda_linea = segunda_linea.replace('>','"')
-            segunda_linea = "[" + segunda_linea + "]"
-            segunda_linea = eval(segunda_linea)
-            calles = []
-            for elemento in segunda_linea:
-                valores = elemento.split(',')
-                tupla = tuple(valores)
-                calles.append(tupla)
-
-            #Mostramos el Parseo hecho
-            print("####Convertido####")
-            print(esquinas)
-            print(calles)
-
-
-    G = nx.DiGraph()
-    for e in esquinas:
-        G.add_node(e)
-
-    for c in calles:
-        e1,e2,c = c
-        G.add_edge(e1,e2,weight=c)
-
-    pos = nx.spring_layout(G, k=0.5, iterations=100)  # Ajusta los valores de 'k' e 'iterations' para separar los nodos más
-
-    nx.draw(G, pos, with_labels=True, arrows=True)
-    edge_labels = nx.get_edge_attributes(G, 'weight')
-    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, label_pos=0.5)
-    plt.show()
-
-imprimir_mapa()
-
-
-
-"""
+    #Verificamos si es un str
+    if isinstance(viaje_final, str):
+        print(viaje_final)
+    else:
+        #Actualizamos los archivos pickle
+        with open('pickle/objetos_autos.pickle', 'wb') as archivo:
+            pickle.dump(hash_autos, archivo)
+            print("-hash autos actualizados-") 
+        with open('pickle/objetos_personas.pickle', 'wb') as archivo:
+            pickle.dump(hash_personas, archivo)
+            print("-hash personas actualizados-")
+        
+        print(viaje_final)
