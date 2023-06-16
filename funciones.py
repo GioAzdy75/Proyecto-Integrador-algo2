@@ -74,14 +74,15 @@ def conocer_ubicacion(objeto_movil,hash_movil):
         return hash_movil[objeto_movil]
     else:
         return f'No existe el objeto {objeto_movil}'
-        
+
+
+"""~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Funcionalidad Nueva de Preprocesamiento de mapa ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"""
 #Agregando la funcionalidad
 def cortar_camino(vertice_1,vertice_2,hash_recorridos):
     '''revisa si ya tiene calculado el camino de los vertices'''
     vertice_2 = vertice_2[0]
     if vertice_1 in hash_recorridos:
         if vertice_2 in hash_recorridos[vertice_1]:
-            print('Me tome un aventon wachin')
             return hash_recorridos[vertice_1][vertice_2]
 #Preprocesando el mapa
 def dijkstra_preprocesos(graph, start):
@@ -385,7 +386,7 @@ def camino_mas_corto(Graph, direction_1, direction_2, process_map): #¿Para dire
 
 #5-
 def crear_viaje(map, person, direction, hash_movil_element, hash_fix_element,process_map):
-    ####ARREGLANDO COSAS
+    #Carga los autos dentro del mismo hash del mapa
     for e in hash_movil_element:
         if e[0] == 'C':
             dire = hash_movil_element[f'{e}'][0]
@@ -445,7 +446,5 @@ def crear_viaje(map, person, direction, hash_movil_element, hash_fix_element,pro
         if car[0] == auto:
             distance = car[1] #Obtengo la distancia (auto --> persona)
     hash_movil_element[person][1] = (hash_movil_element[person][1] - ((distance +  hash_movil_element[auto][1]) / 4))
-    
-    print(map[auto],'Direccion Actualizada')
 
     return camino_destino

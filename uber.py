@@ -287,6 +287,9 @@ elif args.create_trip:
     persona = args.create_trip[0]
     direccion = args.create_trip[1]
     
+    #Verificamos que las personas y los autos esten en el hash:
+    assert persona in hash_personas,f'Error Persona no fue cargada anteriormente'
+
     hash_moviles = {}
     hash_moviles.update(hash_personas)
     hash_moviles.update(hash_autos)
