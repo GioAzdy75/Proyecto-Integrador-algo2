@@ -404,8 +404,8 @@ def crear_viaje(map, person, direction, hash_movil_element, hash_fix_element,pro
     indice = 0
     for auto in autos_cercanos:
         if indice == 0:
-            print('|Autos|Distancia|')
-        print(auto,'-->',indice)
+            print('|Autos|Costo|')
+        print(auto[0],'-',(auto[1] + hash_movil_element[auto[0]][1]) / 4,'-->',indice)
         indice += 1
     #Elije el auto
     auto = int(input('Elija un auto: '))
