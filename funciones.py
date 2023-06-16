@@ -133,6 +133,8 @@ def preprocesando_mapa(graph):
         if i[0] != 'e':
             del recorridos_procesados[i]
     return recorridos_procesados
+
+
 """~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ FUNCIONES PARA DIJKSTRA(INICIO) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"""
 class nodeVertex:
     value = None
@@ -185,46 +187,32 @@ def updateMap(map, name, direction):
     return  
 
 #Dijktra que sirve para verificar que el auto pueda llegar a la posición de la persona.
-def dijkstra(Graph,car,person):
-    """Busca la distancia mas corta entre un nodo A y un nodo B"""
-    assert Graph != {}, f"El mapa está vacío"
-    #Verificar que los vértices v1 y v2 existen dentro del mapa.
-    assert person in Graph, f"La persona {person} no sé encuentra en el mapa."
-    assert car in Graph, f"El auto {car} no sé encuentra en el mapa."
-    assert person in Graph and car in Graph, f"La persona {person} y el auto {car} no sé encuentran en el mapa."
-    #Crear la lista de nodos(pasar los vértices a class = Node()).
-    listVertex = list(Graph.keys())
-    listTypeNodes = []
-    for vertex in listVertex:
-        listTypeNodes = DefinedVertexDijkstra(vertex, listTypeNodes)
-    #Init relax
-    for vertexNode in listTypeNodes:
-        if vertexNode.value == car:
-            initRelax(listTypeNodes, vertexNode)
-            break
-    #Definir lista de nodos visitados.
-    listVisited = []
-    #Ordenar la cola de nodos por su distancia.
-    Queue = sorted(listTypeNodes, key=lambda node:node.distance)
-    while Queue != []:
-        #Obtener el vértice de la cola.
-        u = Queue.pop(0)
-        #Retorno True, si se cumple que puede llegar el auto a la persona.
-        if u.value == person:
-           return True, u.distance
-        #Agregar el vértice a la lista de visitados.
-        listVisited.append(u.value)
-        #Obtener los vértices adyacentes de u.
-        adjacencyNodes = Graph[u.value]
-        #Recorrer la lista de adyacencia de u.
-        if adjacencyNodes != None:
-            for vertex in adjacencyNodes:
-                if vertex[0] not in listVisited:
-                    relax(u,vertex, listTypeNodes)
-        #Ordenar la cola de nodos por su distancia.
-        sorted(listTypeNodes, key=lambda node:node.distance)
-    #Retorno False ya que recorrí todo el mapa y nunca pude llegar a la persona.
-    return False, None
+def dijkstra(graph, start, end):
+    distances = {node: float('inf') for node in graph}
+    distances[start] = 0
+    queue = [(0, start)]
+    
+    while queue:
+        queue.sort(key=lambda x: x[0])  # Ordenar la cola por distancia
+        current_distance, current_node = queue.pop(0)  # Obtener el nodo con la menor distancia
+        
+        if current_node[0] == "C" and current_node != start:
+            continue
+
+        if current_distance > distances[current_node]:
+            continue
+        
+        if current_node == end:
+            return distances[end]
+        
+        for neighbor, weight in graph[current_node]:
+            distance = current_distance + int(weight)
+            if distance < distances[neighbor]:
+                distances[neighbor] = distance
+                queue.append((distance, neighbor))
+    
+    return None
+
 
 #Dijkstra que sirve para buscar los autos más cercanos a la persona.
 def dijkstra_allnodes(Graph, person, hash_movil_element):
@@ -264,11 +252,11 @@ def dijkstra_allnodes(Graph, person, hash_movil_element):
         sorted(listTypeNodes, key=lambda node:node.distance) 
         #Verificar quu el auto cercano pueda llegar a la persona.
         if u.value[0] == "C":
-            validacion, distancia = dijkstra(Graph, u.value, person)
-            if validacion == True:
+            distan = dijkstra(Graph, u.value, person)
+            if  distan != None:
                 #Agregamos a la lista los autos que la persona puede pagar.
-                if hash_movil_element[person][1] >= ((distancia + hash_movil_element[u.value][1]) / 4):  #Ej del hash: [[("e1",4),("e2",6)], 1500]
-                    list_Distance_And_Cars.append((u.value,distancia))
+                if hash_movil_element[person][1] >= ((distan + hash_movil_element[u.value][1]) / 4):  #Ej del hash: [[("e1",4),("e2",6)], 1500]
+                    list_Distance_And_Cars.append((u.value,distan))
             if len(list_Distance_And_Cars) == 3: 
                 return list_Distance_And_Cars  #Devolver la lista con el ranking de los 3 autos más cercanos que la persona puede pagar.  
     #En el peor de los casos es que no hayan al menos 3 autos, devolver error.
@@ -416,12 +404,11 @@ def crear_viaje(map, person, direction, hash_movil_element, hash_fix_element,pro
     indice = 0
     for auto in autos_cercanos:
         if indice == 0:
-            print('|Autos|Costo|')
+            print('|Autos|Distancia|')
         print(auto,'-->',indice)
         indice += 1
     #Elije el auto
     auto = int(input('Elija un auto: '))
-    print(autos_cercanos)
     #Validación del auto
     while auto >= indice:
         print('// Auto Invalido, vuelva a ingresar //')
@@ -447,5 +434,6 @@ def crear_viaje(map, person, direction, hash_movil_element, hash_fix_element,pro
         if car[0] == auto:
             distance = car[1] #Obtengo la distancia (auto --> persona)
     hash_movil_element[person][1] = (hash_movil_element[person][1] - ((distance +  hash_movil_element[auto][1]) / 4))
+    print("Pago :",(((distance +  hash_movil_element[auto][1]) / 4)))
 
     return camino_destino
