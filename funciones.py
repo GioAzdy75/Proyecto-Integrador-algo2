@@ -211,7 +211,7 @@ def dijkstra(Graph,car,person):
         u = Queue.pop(0)
         #Retorno True, si se cumple que puede llegar el auto a la persona.
         if u.value == person:
-           return True
+           return True, u.distance
         #Agregar el vértice a la lista de visitados.
         listVisited.append(u.value)
         #Obtener los vértices adyacentes de u.
@@ -224,7 +224,7 @@ def dijkstra(Graph,car,person):
         #Ordenar la cola de nodos por su distancia.
         sorted(listTypeNodes, key=lambda node:node.distance)
     #Retorno False ya que recorrí todo el mapa y nunca pude llegar a la persona.
-    return False
+    return False, None
 
 #Dijkstra que sirve para buscar los autos más cercanos a la persona.
 def dijkstra_allnodes(Graph, person, hash_movil_element):
@@ -264,10 +264,11 @@ def dijkstra_allnodes(Graph, person, hash_movil_element):
         sorted(listTypeNodes, key=lambda node:node.distance) 
         #Verificar quu el auto cercano pueda llegar a la persona.
         if u.value[0] == "C":
-            if dijkstra(Graph, u.value, person) == True:
+            validacion, distancia = dijkstra(Graph, u.value, person)
+            if validacion == True:
                 #Agregamos a la lista los autos que la persona puede pagar.
-                if hash_movil_element[person][1] >= ((u.distance + hash_movil_element[u.value][1]) / 4):  #Ej del hash: [[("e1",4),("e2",6)], 1500]
-                    list_Distance_And_Cars.append((u.value,u.distance))
+                if hash_movil_element[person][1] >= ((distancia + hash_movil_element[u.value][1]) / 4):  #Ej del hash: [[("e1",4),("e2",6)], 1500]
+                    list_Distance_And_Cars.append((u.value,distancia))
             if len(list_Distance_And_Cars) == 3: 
                 return list_Distance_And_Cars  #Devolver la lista con el ranking de los 3 autos más cercanos que la persona puede pagar.  
     #En el peor de los casos es que no hayan al menos 3 autos, devolver error.
