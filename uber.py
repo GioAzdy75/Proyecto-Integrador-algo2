@@ -316,9 +316,9 @@ elif args.create_trip:
         #Actualizamos los archivos pickle
         with open('pickle/objetos_autos.pickle', 'wb') as archivo:
             pickle.dump(hash_autos, archivo)
-            print("-hash autos actualizados-") 
+             
         with open('pickle/objetos_personas.pickle', 'wb') as archivo:
             pickle.dump(hash_personas, archivo)
-            print("-hash personas actualizados-")
+            
         
         print(viaje_final)
